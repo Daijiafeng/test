@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: testmind-db
+    environment:
+      POSTGRES_USER: testmind
+      POSTGRES_PASSWORD: testmind123
+      POSTGRES_DB: testmind
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/001_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testmind"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存（可选，用于Token黑名单）
+  redis:
+    image: redis:7-alpine
+    container_name: testmind-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Go 后端服务（需要先构建）
+  # user-svc:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: testmind-api
+  #   environment:
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_USER: testmind
+  #     DB_PASSWORD: testmind123
+  #     DB_NAME: testmind
+  #     JWT_SECRET: your-secret-key-min-32-characters
+  #     SERVER_PORT: 8080
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:
