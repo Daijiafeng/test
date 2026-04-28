@@ -37,7 +37,7 @@ func main() {
 	r.Use(gin.Recovery())
 
 	// 创建Handler
-	userHandler := handler.NewUserHandler(cfg)
+	userHandler := handler.NewUserHandler(cfg, db)
 	orgHandler := handler.NewOrganizationHandler(db)
 	projectHandler := handler.NewProjectHandler(db)
 	planHandler := handler.NewTestPlanHandler(db)

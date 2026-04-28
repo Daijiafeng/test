@@ -47,7 +47,7 @@ type RegisterRequest struct {
 	Username    string `json:"username" validate:"required,username"`
 	Password    string `json:"password" validate:"required,password"`
 	Email       string `json:"email" validate:"required,email"`
-	DisplayName string `json:"display_name" validate:"required,min=2,max=50"`
+	DisplayName string `json:"display_name" validate:"omitempty,min=2,max=50"`
 	Language    string `json:"language" validate:"omitempty,oneof=zh-CN en-US"`
 }
 

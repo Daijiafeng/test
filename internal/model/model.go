@@ -1,6 +1,9 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -194,6 +197,27 @@ type TestReport struct {
 
 // JSONB 用于 PostgreSQL JSONB 类型
 type JSONB map[string]interface{}
+
+// Value 实现 driver.Valuer 接口
+func (j JSONB) Value() (driver.Value, error) {
+	if j == nil {
+		return nil, nil
+	}
+	return json.Marshal(j)
+}
+
+// Scan 实现 sql.Scanner 接口
+func (j *JSONB) Scan(value interface{}) error {
+	if value == nil {
+		*j = nil
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("failed to scan JSONB: expected []byte, got %T", value)
+	}
+	return json.Unmarshal(bytes, j)
+}
 
 // Module 模块
 type Module struct {

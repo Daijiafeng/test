@@ -9,6 +9,7 @@ import (
 
 	"testmind/internal/config"
 	"testmind/internal/model"
+	"testmind/internal/repository"
 	"testmind/pkg/jwt"
 	"testmind/pkg/response"
 	"testmind/pkg/validator"
@@ -16,15 +17,17 @@ import (
 
 type UserHandler struct {
 	jwtManager *jwt.JWTManager
+	userRepo   *repository.UserRepository
 }
 
-func NewUserHandler(cfg *config.Config) *UserHandler {
+func NewUserHandler(cfg *config.Config, db *repository.DB) *UserHandler {
 	return &UserHandler{
 		jwtManager: jwt.NewJWTManager(
 			cfg.JWT.Secret,
 			cfg.JWT.AccessTokenExp,
 			cfg.JWT.RefreshTokenExp,
 		),
+		userRepo: repository.NewUserRepository(db),
 	}
 }
 
@@ -43,7 +46,11 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	// 检查用户名是否已存在
-	// TODO: 查询数据库验证用户名唯一性
+	existingUser, _ := h.userRepo.FindByUsername(c.Request.Context(), req.Username)
+	if existingUser != nil {
+		response.BadRequest(c, "用户名已存在", "Username already exists")
+		return
+	}
 
 	// 密码加密
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -65,7 +72,18 @@ func (h *UserHandler) Register(c *gin.Context) {
 		UpdatedAt:     time.Now(),
 	}
 
-	// TODO: 保存到数据库
+	if user.DisplayName == "" {
+		user.DisplayName = req.Username
+	}
+	if user.Language == "" {
+		user.Language = "zh-CN"
+	}
+
+	// 保存到数据库
+	if err := h.userRepo.Create(c.Request.Context(), user); err != nil {
+		response.InternalError(c, "注册失败", "Failed to register user")
+		return
+	}
 
 	// 生成Token
 	tokenPair, err := h.jwtManager.GenerateTokenPair(user.UserID, user.Username, "", "")
@@ -94,17 +112,27 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// TODO: 查询数据库验证用户名密码
-	// 模拟用户数据
-	user := &model.User{
-		UserID:      "test_user_001",
-		Username:    req.Username,
-		Email:      "test@example.com",
-		DisplayName: "测试用户",
-		Language:    "zh-CN",
-		Status:      "active",
-		LastLoginAt: time.Now(),
+	// 查询数据库验证用户名密码
+	user, err := h.userRepo.FindByUsername(c.Request.Context(), req.Username)
+	if err != nil {
+		response.InternalError(c, "登录失败", "Failed to login")
+		return
 	}
+	if user == nil {
+		response.Unauthorized(c)
+		return
+	}
+
+	// 验证密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		response.Unauthorized(c)
+		return
+	}
+
+	// 更新最后登录时间
+	now := time.Now()
+	user.LastLoginAt = now
+	h.userRepo.Update(c.Request.Context(), user)
 
 	// 生成Token
 	tokenPair, err := h.jwtManager.GenerateTokenPair(user.UserID, user.Username, "", "")
@@ -144,22 +172,21 @@ func (h *UserHandler) Refresh(c *gin.Context) {
 // GetProfile 获取用户信息
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	// 从上下文获取用户ID（由中间件设置）
-	userID, exists := c.Get("user_id")
-	if !exists {
+	userID := c.GetString("user_id")
+	if userID == "" {
 		response.Unauthorized(c)
 		return
 	}
 
-	// TODO: 从数据库查询用户信息
-	// 模拟数据
-	user := &model.User{
-		UserID:      userID.(string),
-		Username:    "test_user",
-		Email:       "test@example.com",
-		DisplayName: "测试用户",
-		Language:    "zh-CN",
-		Status:      "active",
-		CreatedAt:   time.Now().AddDate(0, -1, 0),
+	// 从数据库查询用户信息
+	user, err := h.userRepo.FindByID(c.Request.Context(), userID)
+	if err != nil {
+		response.InternalError(c, "查询用户信息失败", "Failed to get user info")
+		return
+	}
+	if user == nil {
+		response.NotFound(c, "用户不存在", "User not found")
+		return
 	}
 
 	response.Success(c, user)
@@ -167,8 +194,8 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 // UpdateProfile 更新用户信息
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
+	userID := c.GetString("user_id")
+	if userID == "" {
 		response.Unauthorized(c)
 		return
 	}
@@ -177,6 +204,9 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		DisplayName string `json:"display_name" binding:"omitempty,min=2,max=50"`
 		AvatarURL   string `json:"avatar_url" binding:"omitempty,url"`
 		Language    string `json:"language" binding:"omitempty,oneof=zh-CN en-US"`
+
+		// 其他可更新字段
+		Phone string `json:"phone" binding:"omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -184,15 +214,35 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	// TODO: 更新数据库
+	// 查询当前用户
+	user, err := h.userRepo.FindByID(c.Request.Context(), userID)
+	if err != nil || user == nil {
+		response.NotFound(c, "用户不存在", "User not found")
+		return
+	}
 
-	response.Success(c, gin.H{
-		"user_id":      userID,
-		"display_name": req.DisplayName,
-		"avatar_url":   req.AvatarURL,
-		"language":     req.Language,
-		"updated_at":   time.Now(),
-	})
+	// 更新字段
+	if req.DisplayName != "" {
+		user.DisplayName = req.DisplayName
+	}
+	if req.AvatarURL != "" {
+		user.AvatarURL = req.AvatarURL
+	}
+	if req.Language != "" {
+		user.Language = req.Language
+	}
+	if req.Phone != "" {
+		user.Phone = req.Phone
+	}
+	user.UpdatedAt = time.Now()
+
+	// 保存到数据库
+	if err := h.userRepo.Update(c.Request.Context(), user); err != nil {
+		response.InternalError(c, "更新失败", "Failed to update profile")
+		return
+	}
+
+	response.Success(c, user)
 }
 
 // Logout 登出
