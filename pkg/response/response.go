@@ -62,7 +62,7 @@ func SuccessWithPagination(c *gin.Context, data interface{}, page, pageSize int,
 		Data: data,
 		Pagination: &Pagination{
 			Page:     page,
-			PageSize: pageSize,
+		PageSize: pageSize,
 			Total:    total,
 			HasMore:  int64(page * pageSize) < total,
 		},

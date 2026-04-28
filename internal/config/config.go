@@ -41,11 +41,11 @@ type FeishuConfig struct {
 }
 
 type AIConfig struct {
-	Mode            string // cloud, local, hybrid
-	CloudAPIKey     string
-	CloudModel      string
-	LocalModelPath  string
-	LocalModelPort  int
+	Mode           string // cloud, local, hybrid
+	CloudAPIKey    string
+	CloudModel     string
+	LocalModelPath string
+	LocalModelPort int
 }
 
 func Load() *Config {
@@ -59,12 +59,12 @@ func Load() *Config {
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnvInt("DB_PORT", 5432),
 			User:     getEnv("DB_USER", "testmind"),
-			Password: getEnv("DB_PASSWORD", ""),
+			Password: getEnv("DB_PASSWORD", "testmind123"),
 			DBName:   getEnv("DB_NAME", "testmind"),
 			SSLMode:  getEnv("DB_SSL_MODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:          getEnv("JWT_SECRET", "testmind-secret-key"),
+			Secret:          getEnv("JWT_SECRET", "testmind-secret-key-min-32-characters-required"),
 			AccessTokenExp:  getEnvInt("JWT_ACCESS_TOKEN_EXP", 2),
 			RefreshTokenExp: getEnvInt("JWT_REFRESH_TOKEN_EXP", 7),
 		},

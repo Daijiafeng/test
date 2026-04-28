@@ -40,6 +40,10 @@ func main() {
 	userHandler := handler.NewUserHandler(cfg)
 	orgHandler := handler.NewOrganizationHandler(db)
 	projectHandler := handler.NewProjectHandler(db)
+	planHandler := handler.NewTestPlanHandler(db)
+	caseHandler := handler.NewTestCaseHandler(db)
+	moduleHandler := handler.NewModuleHandler(db)
+	customFieldHandler := handler.NewCustomFieldHandler(db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -79,19 +83,45 @@ func main() {
 			authorized.DELETE("/projects/:project_id/members/:user_id", projectHandler.RemoveMember)
 			authorized.PUT("/projects/:project_id/members/:user_id", projectHandler.UpdateMemberRole)
 
-			// 测试计划（待实现）
-			// authorized.POST("/projects/:project_id/plans", planHandler.Create)
-			// authorized.GET("/projects/:project_id/plans", planHandler.List)
-			// authorized.GET("/plans/:plan_id", planHandler.Get)
-			// authorized.PUT("/plans/:plan_id", planHandler.Update)
-			// authorized.DELETE("/plans/:plan_id", planHandler.Delete)
+			// 测试计划
+			authorized.POST("/projects/:project_id/plans", planHandler.Create)
+			authorized.GET("/projects/:project_id/plans", planHandler.List)
+			authorized.GET("/plans/:plan_id", planHandler.Get)
+			authorized.PUT("/plans/:plan_id", planHandler.Update)
+			authorized.DELETE("/plans/:plan_id", planHandler.Delete)
+			authorized.POST("/plans/:plan_id/requirements", planHandler.AddRequirement)
+			authorized.GET("/plans/:plan_id/requirements", planHandler.ListRequirements)
+			authorized.POST("/plans/:plan_id/cases", planHandler.AddCases)
+			authorized.DELETE("/plans/:plan_id/cases", planHandler.RemoveCases)
+			authorized.GET("/plans/:plan_id/progress", planHandler.GetProgress)
 
-			// 测试用例（待实现）
-			// authorized.POST("/projects/:project_id/cases", caseHandler.Create)
-			// authorized.GET("/projects/:project_id/cases", caseHandler.List)
-			// authorized.GET("/cases/:case_id", caseHandler.Get)
-			// authorized.PUT("/cases/:case_id", caseHandler.Update)
-			// authorized.DELETE("/cases/:case_id", caseHandler.Delete)
+			// 测试用例
+			authorized.POST("/projects/:project_id/cases", caseHandler.Create)
+			authorized.GET("/projects/:project_id/cases", caseHandler.List)
+			authorized.GET("/projects/:project_id/cases/search", caseHandler.Search)
+			authorized.POST("/projects/:project_id/cases/batch", caseHandler.BatchCreate)
+			authorized.GET("/cases/:case_id", caseHandler.Get)
+			authorized.PUT("/cases/:case_id", caseHandler.Update)
+			authorized.DELETE("/cases/:case_id", caseHandler.Delete)
+			authorized.GET("/cases/:case_id/versions", caseHandler.GetVersions)
+			authorized.POST("/cases/:case_id/review", caseHandler.Review)
+
+			// 模块管理
+			authorized.POST("/projects/:project_id/modules", moduleHandler.Create)
+			authorized.GET("/projects/:project_id/modules", moduleHandler.List)
+			authorized.PUT("/modules/:module_id", moduleHandler.Update)
+			authorized.DELETE("/modules/:module_id", moduleHandler.Delete)
+
+			// 自定义字段
+			authorized.POST("/projects/:project_id/custom-fields", customFieldHandler.Create)
+			authorized.GET("/projects/:project_id/custom-fields", customFieldHandler.List)
+			authorized.PUT("/custom-fields/:field_id", customFieldHandler.Update)
+			authorized.DELETE("/custom-fields/:field_id", customFieldHandler.Delete)
+
+			// TODO: 测试执行
+			// TODO: 缺陷管理
+			// TODO: 测试报告
+			// TODO: AI生成
 		}
 	}
 
@@ -99,14 +129,14 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ok",
-			"service": "user-svc",
+			"service": "testmind-api",
 			"version": "1.0.0",
 		})
 	})
 
 	// 启动服务
 	addr := cfg.Server.Host + ":" + itoa(cfg.Server.Port)
-	log.Printf("Starting user-svc on %s", addr)
+	log.Printf("🦞 TestMind API running on %s", addr)
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

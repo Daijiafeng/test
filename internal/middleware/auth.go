@@ -97,7 +97,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Accept-Language, X-Request-ID")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Content-Type")
 
@@ -124,13 +124,10 @@ func RequestIDMiddleware() gin.HandlerFunc {
 }
 
 func generateRequestID() string {
-	return strings.ReplaceAll(strings.ReplaceAll(
-		"req_"+time.Now().Format("20060102150405")+"_"+randomString(8),
-		"-", ""), " ", "")
+	return "req_" + time.Now().Format("20060102150405") + "_" + randomString(8)
 }
 
 func randomString(n int) string {
-	// 简化实现，实际应使用更安全的随机生成
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, n)
 	for i := range b {
