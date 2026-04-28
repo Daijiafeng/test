@@ -46,6 +46,8 @@ func main() {
 	customFieldHandler := handler.NewCustomFieldHandler(db)
 	executionHandler := handler.NewExecutionHandler(db)
 	defectHandler := handler.NewDefectHandler(db)
+	reportHandler := handler.NewReportHandler(db)
+	feishuHandler := handler.NewFeishuHandler(cfg, db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -152,6 +154,24 @@ func main() {
 			// TODO: 测试报告
 			// TODO: AI生成
 			// TODO: 飞书集成
+
+			// 测试报告
+			authorized.POST("/projects/:project_id/reports", reportHandler.Generate)
+			authorized.GET("/projects/:project_id/reports", reportHandler.List)
+			authorized.GET("/reports/:report_id", reportHandler.Get)
+			authorized.PUT("/reports/:report_id", reportHandler.Update)
+			authorized.DELETE("/reports/:report_id", reportHandler.Delete)
+			authorized.GET("/reports/:report_id/export", reportHandler.Export)
+			authorized.POST("/reports/:report_id/share", reportHandler.Share)
+
+			// 飞书集成
+			authorized.GET("/feishu/oauth/config", feishuHandler.GetOAuthConfig)
+			authorized.POST("/feishu/oauth/authorize", feishuHandler.OAuthAuthorize)
+			authorized.GET("/feishu/oauth/callback", feishuHandler.OAuthCallback)
+			authorized.POST("/feishu/oauth/refresh", feishuHandler.RefreshToken)
+			authorized.GET("/feishu/credential", feishuHandler.GetCredential)
+			authorized.DELETE("/feishu/credential", feishuHandler.RevokeAuth)
+			authorized.GET("/feishu/documents/:doc_id", feishuHandler.FetchDocument)
 		}
 	}
 
