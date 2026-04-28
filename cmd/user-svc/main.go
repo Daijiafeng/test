@@ -8,6 +8,7 @@ import (
 	"testmind/internal/config"
 	"testmind/internal/handler"
 	"testmind/internal/middleware"
+	"testmind/internal/repository"
 )
 
 func main() {
@@ -18,6 +19,13 @@ func main() {
 	if cfg.Server.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// 连接数据库
+	db, err := repository.NewDB(&cfg.Database)
+	if err != nil {
+		log.Fatalf("Failed to connect database: %v", err)
+	}
+	log.Println("Database connected successfully")
 
 	// 创建路由
 	r := gin.New()
@@ -30,6 +38,8 @@ func main() {
 
 	// 创建Handler
 	userHandler := handler.NewUserHandler(cfg)
+	orgHandler := handler.NewOrganizationHandler(db)
+	projectHandler := handler.NewProjectHandler(db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -53,61 +63,35 @@ func main() {
 			authorized.POST("/auth/logout", userHandler.Logout)
 
 			// 组织管理
-			// authorized.POST("/organizations", orgHandler.Create)
-			// authorized.GET("/organizations/:org_id", orgHandler.Get)
-			// authorized.PUT("/organizations/:org_id", orgHandler.Update)
-			// authorized.GET("/organizations/:org_id/projects", orgHandler.ListProjects)
+			authorized.POST("/organizations", orgHandler.Create)
+			authorized.GET("/organizations", orgHandler.List)
+			authorized.GET("/organizations/:org_id", orgHandler.Get)
+			authorized.PUT("/organizations/:org_id", orgHandler.Update)
+			authorized.GET("/organizations/:org_id/projects", orgHandler.ListProjects)
 
 			// 项目管理
-			// authorized.POST("/projects", projectHandler.Create)
-			// authorized.GET("/projects/:project_id", projectHandler.Get)
-			// authorized.PUT("/projects/:project_id", projectHandler.Update)
-			// authorized.DELETE("/projects/:project_id", projectHandler.Delete)
-			// authorized.GET("/projects/:project_id/members", projectHandler.ListMembers)
-			// authorized.POST("/projects/:project_id/members", projectHandler.AddMember)
-			// authorized.DELETE("/projects/:project_id/members/:user_id", projectHandler.RemoveMember)
+			authorized.POST("/projects", projectHandler.Create)
+			authorized.GET("/projects/:project_id", projectHandler.Get)
+			authorized.PUT("/projects/:project_id", projectHandler.Update)
+			authorized.DELETE("/projects/:project_id", projectHandler.Delete)
+			authorized.GET("/projects/:project_id/members", projectHandler.ListMembers)
+			authorized.POST("/projects/:project_id/members", projectHandler.AddMember)
+			authorized.DELETE("/projects/:project_id/members/:user_id", projectHandler.RemoveMember)
+			authorized.PUT("/projects/:project_id/members/:user_id", projectHandler.UpdateMemberRole)
 
-			// 测试计划
+			// 测试计划（待实现）
 			// authorized.POST("/projects/:project_id/plans", planHandler.Create)
 			// authorized.GET("/projects/:project_id/plans", planHandler.List)
 			// authorized.GET("/plans/:plan_id", planHandler.Get)
 			// authorized.PUT("/plans/:plan_id", planHandler.Update)
 			// authorized.DELETE("/plans/:plan_id", planHandler.Delete)
 
-			// 测试用例
+			// 测试用例（待实现）
 			// authorized.POST("/projects/:project_id/cases", caseHandler.Create)
 			// authorized.GET("/projects/:project_id/cases", caseHandler.List)
 			// authorized.GET("/cases/:case_id", caseHandler.Get)
 			// authorized.PUT("/cases/:case_id", caseHandler.Update)
 			// authorized.DELETE("/cases/:case_id", caseHandler.Delete)
-
-			// AI生成用例
-			// authorized.POST("/projects/:project_id/cases/ai/generate", aiHandler.GenerateCases)
-			// authorized.GET("/projects/:project_id/cases/ai/generate/:task_id/status", aiHandler.GetGenerateStatus)
-
-			// 测试执行
-			// authorized.POST("/plans/:plan_id/executions", execHandler.Create)
-			// authorized.GET("/plans/:plan_id/executions", execHandler.List)
-			// authorized.GET("/executions/:execution_id", execHandler.Get)
-
-			// 缺陷管理
-			// authorized.POST("/projects/:project_id/defects", defectHandler.Create)
-			// authorized.GET("/projects/:project_id/defects", defectHandler.List)
-			// authorized.GET("/defects/:defect_id", defectHandler.Get)
-			// authorized.PUT("/defects/:defect_id", defectHandler.Update)
-			// authorized.POST("/defects/:defect_id/transition", defectHandler.Transition)
-			// authorized.POST("/defects/:defect_id/comments", defectHandler.AddComment)
-
-			// 测试报告
-			// authorized.POST("/plans/:plan_id/reports", reportHandler.Generate)
-			// authorized.GET("/projects/:project_id/reports", reportHandler.List)
-			// authorized.GET("/reports/:report_id", reportHandler.Get)
-
-			// 系统配置
-			// authorized.POST("/projects/:project_id/custom-fields", configHandler.CreateCustomField)
-			// authorized.GET("/projects/:project_id/custom-fields", configHandler.ListCustomFields)
-			// authorized.POST("/projects/:project_id/modules", configHandler.CreateModule)
-			// authorized.GET("/projects/:project_id/modules", configHandler.ListModules)
 		}
 	}
 
@@ -121,9 +105,21 @@ func main() {
 	})
 
 	// 启动服务
-	addr := cfg.Server.Host + ":" + string(rune(cfg.Server.Port))
+	addr := cfg.Server.Host + ":" + itoa(cfg.Server.Port)
 	log.Printf("Starting user-svc on %s", addr)
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func itoa(n int) string {
+	if n == 0 {
+		return "0"
+	}
+	var result []byte
+	for n > 0 {
+		result = append([]byte{byte(n%10) + '0'}, result...)
+		n /= 10
+	}
+	return string(result)
 }
