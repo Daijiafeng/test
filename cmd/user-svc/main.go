@@ -48,6 +48,7 @@ func main() {
 	defectHandler := handler.NewDefectHandler(db)
 	reportHandler := handler.NewReportHandler(db)
 	feishuHandler := handler.NewFeishuHandler(cfg, db)
+	aiHandler := handler.NewAIHandler(cfg, db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -172,6 +173,13 @@ func main() {
 			authorized.GET("/feishu/credential", feishuHandler.GetCredential)
 			authorized.DELETE("/feishu/credential", feishuHandler.RevokeAuth)
 			authorized.GET("/feishu/documents/:doc_id", feishuHandler.FetchDocument)
+
+			// AI生成
+			authorized.POST("/projects/:project_id/ai/generate", aiHandler.GenerateCase)
+			authorized.GET("/ai/tasks/:task_id", aiHandler.GetTaskStatus)
+			authorized.GET("/projects/:project_id/ai/tasks", aiHandler.ListTasks)
+			authorized.POST("/ai/tasks/:task_id/apply", aiHandler.ApplyCases)
+			authorized.POST("/cases/:case_id/optimize", aiHandler.OptimizeCase)
 		}
 	}
 
