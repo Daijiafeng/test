@@ -1,0 +1,428 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TestMind API",
+    "description": "AI驱动的测试管理平台API文档",
+    "version": "1.0.0",
+    "contact": {
+      "name": "戴佳峰",
+      "email": "testmind@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api/v1",
+      "description": "本地开发环境"
+    }
+  ],
+  "tags": [
+    {"name": "Auth", "description": "用户认证"},
+    {"name": "Organization", "description": "组织管理"},
+    {"name": "Project", "description": "项目管理"},
+    {"name": "TestPlan", "description": "测试计划"},
+    {"name": "TestCase", "description": "测试用例"},
+    {"name": "Module", "description": "模块管理"},
+    {"name": "CustomField", "description": "自定义字段"},
+    {"name": "Execution", "description": "测试执行"},
+    {"name": "Defect", "description": "缺陷管理"},
+    {"name": "Report", "description": "测试报告"},
+    {"name": "Feishu", "description": "飞书集成"},
+    {"name": "AI", "description": "AI生成"},
+    {"name": "Knowledge", "description": "知识库"}
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "用户注册",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/RegisterRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "注册成功"},
+          "400": {"description": "参数错误"}
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "用户登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/LoginRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "登录成功"},
+          "401": {"description": "认证失败"}
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "刷新Token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"type": "object", "properties": {"refresh_token": {"type": "string"}}}
+            }
+          }
+        },
+        "responses": {"200": {"description": "刷新成功"}}
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "获取用户信息",
+        "security": [{"BearerAuth": []}],
+        "responses": {"200": {"description": "用户信息"}}
+      },
+      "put": {
+        "tags": ["Auth"],
+        "summary": "更新用户信息",
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        },
+        "responses": {"200": {"description": "更新成功"}}
+      }
+    },
+    "/organizations": {
+      "post": {
+        "tags": ["Organization"],
+        "summary": "创建组织",
+        "security": [{"BearerAuth": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateOrgRequest"}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      },
+      "get": {
+        "tags": ["Organization"],
+        "summary": "获取组织列表",
+        "security": [{"BearerAuth": []}],
+        "responses": {"200": {"description": "组织列表"}}
+      }
+    },
+    "/projects": {
+      "post": {
+        "tags": ["Project"],
+        "summary": "创建项目",
+        "security": [{"BearerAuth": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"name": {"type": "string"}, "name_en": {"type": "string"}, "description": {"type": "string"}}}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      }
+    },
+    "/projects/{project_id}/plans": {
+      "post": {
+        "tags": ["TestPlan"],
+        "summary": "创建测试计划",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreatePlanRequest"}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      },
+      "get": {
+        "tags": ["TestPlan"],
+        "summary": "获取测试计划列表",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "计划列表"}}
+      }
+    },
+    "/plans/{plan_id}/progress": {
+      "get": {
+        "tags": ["TestPlan"],
+        "summary": "获取计划执行进度",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "plan_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "执行进度统计"}}
+      }
+    },
+    "/projects/{project_id}/cases": {
+      "post": {
+        "tags": ["TestCase"],
+        "summary": "创建测试用例",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateCaseRequest"}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      },
+      "get": {
+        "tags": ["TestCase"],
+        "summary": "获取用例列表",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "priority", "in": "query", "schema": {"type": "string", "enum": ["P0","P1","P2","P3"]}},
+          {"name": "status", "in": "query", "schema": {"type": "string"}},
+          {"name": "keyword", "in": "query", "schema": {"type": "string"}}
+        ],
+        "responses": {"200": {"description": "用例列表"}}
+      }
+    },
+    "/projects/{project_id}/cases/batch": {
+      "post": {
+        "tags": ["TestCase"],
+        "summary": "批量创建用例（AI生成后使用）",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "批量创建结果"}}
+      }
+    },
+    "/cases/{case_id}/review": {
+      "post": {
+        "tags": ["TestCase"],
+        "summary": "提交用例评审",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "case_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"result": {"type": "string", "enum": ["approved","rejected"]}, "comment": {"type": "string"}}}}}},
+        "responses": {"200": {"description": "评审结果"}}
+      }
+    },
+    "/plans/{plan_id}/executions": {
+      "post": {
+        "tags": ["Execution"],
+        "summary": "创建执行记录",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "plan_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateExecutionRequest"}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      }
+    },
+    "/executions/{execution_id}/defect": {
+      "post": {
+        "tags": ["Execution"],
+        "summary": "从执行记录快速创建缺陷",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "execution_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "缺陷创建成功"}}
+      }
+    },
+    "/projects/{project_id}/defects": {
+      "post": {
+        "tags": ["Defect"],
+        "summary": "创建缺陷",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateDefectRequest"}}}},
+        "responses": {"200": {"description": "创建成功"}}
+      },
+      "get": {
+        "tags": ["Defect"],
+        "summary": "获取缺陷列表",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "status", "in": "query", "schema": {"type": "string"}},
+          {"name": "severity", "in": "query", "schema": {"type": "string"}},
+          {"name": "keyword", "in": "query", "schema": {"type": "string"}}
+        ],
+        "responses": {"200": {"description": "缺陷列表"}}
+      }
+    },
+    "/defects/{defect_id}/transition": {
+      "post": {
+        "tags": ["Defect"],
+        "summary": "缺陷状态流转",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "defect_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"target_status": {"type": "string", "enum": ["open","in_progress","fixed","verified","closed","reopened","rejected"]}, "comment": {"type": "string"}}}}}},
+        "responses": {"200": {"description": "流转成功"}}
+      }
+    },
+    "/projects/{project_id}/reports": {
+      "post": {
+        "tags": ["Report"],
+        "summary": "生成测试报告",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"plan_id": {"type": "string"}, "report_type": {"type": "string", "enum": ["summary","detailed","execution","defect","custom"]}}}}}},
+        "responses": {"200": {"description": "报告生成成功"}}
+      }
+    },
+    "/feishu/oauth/authorize": {
+      "post": {
+        "tags": ["Feishu"],
+        "summary": "发起飞书OAuth授权",
+        "security": [{"BearerAuth": []}],
+        "responses": {"200": {"description": "授权URL"}}
+      }
+    },
+    "/feishu/oauth/callback": {
+      "get": {
+        "tags": ["Feishu"],
+        "summary": "飞书OAuth回调",
+        "parameters": [
+          {"name": "code", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "state", "in": "query", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {"200": {"description": "授权成功"}}
+      }
+    },
+    "/projects/{project_id}/ai/generate": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "AI生成测试用例",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "project_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AIGenerateRequest"}}}},
+        "responses": {"200": {"description": "生成结果"}}
+      }
+    },
+    "/cases/{case_id}/optimize": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "AI优化测试用例",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "case_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"optimize_type": {"type": "string", "enum": ["enhance","simplify","translate","format"]}, "target_lang": {"type": "string"}}}}}},
+        "responses": {"200": {"description": "优化结果"}}
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["username", "email", "password"],
+        "properties": {
+          "username": {"type": "string", "minLength": 3, "maxLength": 50},
+          "email": {"type": "string", "format": "email"},
+          "password": {"type": "string", "minLength": 8, "maxLength": 128}
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {"type": "string"},
+          "password": {"type": "string"}
+        }
+      },
+      "CreateOrgRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {"type": "string", "minLength": 2, "maxLength": 200},
+          "name_en": {"type": "string", "maxLength": 200},
+          "description": {"type": "string"}
+        }
+      },
+      "CreatePlanRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {"type": "string", "minLength": 2, "maxLength": 200},
+          "version": {"type": "string"},
+          "description": {"type": "string"},
+          "start_date": {"type": "string", "format": "date"},
+          "end_date": {"type": "string", "format": "date"}
+        }
+      },
+      "CreateCaseRequest": {
+        "type": "object",
+        "required": ["title", "priority", "steps"],
+        "properties": {
+          "title": {"type": "string", "minLength": 5, "maxLength": 500},
+          "title_en": {"type": "string"},
+          "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+          "precondition": {"type": "string"},
+          "steps": {"type": "array", "items": {"$ref": "#/components/schemas/Step"}, "minItems": 1},
+          "tags": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Step": {
+        "type": "object",
+        "properties": {
+          "step_num": {"type": "integer"},
+          "action": {"type": "string"},
+          "action_en": {"type": "string"},
+          "expected": {"type": "string"},
+          "expected_en": {"type": "string"}
+        }
+      },
+      "CreateExecutionRequest": {
+        "type": "object",
+        "required": ["case_id", "execution_type", "result"],
+        "properties": {
+          "case_id": {"type": "string"},
+          "execution_type": {"type": "string", "enum": ["manual", "auto_web", "auto_api", "auto_mobile", "auto_performance"]},
+          "result": {"type": "string", "enum": ["passed", "failed", "blocked", "skipped"]},
+          "actual_result": {"type": "string"},
+          "duration": {"type": "integer"},
+          "related_defect_id": {"type": "string"}
+        }
+      },
+      "CreateDefectRequest": {
+        "type": "object",
+        "required": ["title", "severity", "priority"],
+        "properties": {
+          "title": {"type": "string", "minLength": 5, "maxLength": 500},
+          "description": {"type": "string"},
+          "severity": {"type": "string", "enum": ["fatal", "critical", "general", "minor", "suggestion"]},
+          "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+          "module_id": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "AIGenerateRequest": {
+        "type": "object",
+        "required": ["source_type", "project_id"],
+        "properties": {
+          "source_type": {"type": "string", "enum": ["manual", "feishu_doc", "text"]},
+          "source_content": {"type": "string"},
+          "feishu_doc_id": {"type": "string"},
+          "project_id": {"type": "string"},
+          "priority_strategy": {"type": "string", "enum": ["auto", "high", "medium", "low"]},
+          "case_style": {"type": "string", "enum": ["standard", "concise", "detailed"]},
+          "language": {"type": "string", "enum": ["zh-CN", "en-US"]},
+          "max_cases": {"type": "integer", "minimum": 1, "maximum": 200},
+          "custom_prompt": {"type": "string"}
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "integer"},
+          "message": {"type": "string"},
+          "message_i18n": {
+            "type": "object",
+            "properties": {
+              "zh-CN": {"type": "string"},
+              "en-US": {"type": "string"}
+            }
+          },
+          "data": {"type": "object"},
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {"type": "integer"},
+              "page_size": {"type": "integer"},
+              "total": {"type": "integer"},
+              "has_more": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

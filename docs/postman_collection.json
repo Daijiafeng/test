@@ -1,0 +1,343 @@
+{
+  "info": {
+    "name": "TestMind API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"email\":\"test@example.com\",\"password\":\"password123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"password123\"}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"]},
+            "body": {"mode": "raw", "raw": "{\"refresh_token\":\"{{refresh_token}}\"}"}
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/auth/profile", "host": ["{{base_url}}"], "path": ["auth", "profile"]}
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Organization",
+      "item": [
+        {
+          "name": "Create Organization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/organizations", "host": ["{{base_url}}"], "path": ["organizations"]},
+            "body": {"mode": "raw", "raw": "{\"name\":\"Test Organization\",\"description\":\"测试组织\"}"}
+          }
+        },
+        {
+          "name": "List Organizations",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/organizations", "host": ["{{base_url}}"], "path": ["organizations"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Project",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects", "host": ["{{base_url}}"], "path": ["projects"]},
+            "body": {"mode": "raw", "raw": "{\"name\":\"Test Project\",\"name_en\":\"Test Project\",\"description\":\"测试项目描述\"}"}
+          }
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}"]}
+          }
+        },
+        {
+          "name": "Add Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/members", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "members"]},
+            "body": {"mode": "raw", "raw": "{\"user_id\":\"{{user_id}}\",\"role\":\"member\"}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Plan",
+      "item": [
+        {
+          "name": "Create Test Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/plans", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "plans"]},
+            "body": {"mode": "raw", "raw": "{\"name\":\"v1.0 Test Plan\",\"version\":\"1.0\",\"description\":\"测试计划描述\"}"}
+          }
+        },
+        {
+          "name": "Get Plan Progress",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/plans/{{plan_id}}/progress", "host": ["{{base_url}}"], "path": ["plans", "{{plan_id}}", "progress"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Case",
+      "item": [
+        {
+          "name": "Create Test Case",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/cases", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "cases"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"登录功能测试\",\"priority\":\"P1\",\"precondition\":\"系统正常运行\",\"steps\":[{\"step_num\":1,\"action\":\"打开登录页面\",\"expected\":\"页面正常显示\"},{\"step_num\":2,\"action\":\"输入用户名密码\",\"expected\":\"输入成功\"},{\"step_num\":3,\"action\":\"点击登录按钮\",\"expected\":\"登录成功\"}]}"
+            }
+          }
+        },
+        {
+          "name": "List Test Cases",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/cases?priority=P1", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "cases"], "query": [{"key": "priority", "value": "P1"}]}
+          }
+        },
+        {
+          "name": "Review Test Case",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/cases/{{case_id}}/review", "host": ["{{base_url}}"], "path": ["cases", "{{case_id}}", "review"]},
+            "body": {"mode": "raw", "raw": "{\"result\":\"approved\",\"comment\":\"用例编写规范，可以执行\"}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Execution",
+      "item": [
+        {
+          "name": "Create Execution Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/plans/{{plan_id}}/executions", "host": ["{{base_url}}"], "path": ["plans", "{{plan_id}}", "executions"]},
+            "body": {"mode": "raw", "raw": "{\"case_id\":\"{{case_id}}\",\"execution_type\":\"manual\",\"result\":\"passed\",\"duration\":60}"}
+          }
+        },
+        {
+          "name": "Create Defect from Execution",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/executions/{{execution_id}}/defect", "host": ["{{base_url}}"], "path": ["executions", "{{execution_id}}", "defect"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Defect",
+      "item": [
+        {
+          "name": "Create Defect",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/defects", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "defects"]},
+            "body": {"mode": "raw", "raw": "{\"title\":\"登录页面无法加载\",\"severity\":\"critical\",\"priority\":\"P0\",\"description\":\"登录页面加载超时\"}"}
+          }
+        },
+        {
+          "name": "Transition Defect Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/defects/{{defect_id}}/transition", "host": ["{{base_url}}"], "path": ["defects", "{{defect_id}}", "transition"]},
+            "body": {"mode": "raw", "raw": "{\"target_status\":\"in_progress\",\"comment\":\"开始修复\"}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report",
+      "item": [
+        {
+          "name": "Generate Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/reports", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "reports"]},
+            "body": {"mode": "raw", "raw": "{\"plan_id\":\"{{plan_id}}\",\"report_type\":\"summary\"}"}
+          }
+        },
+        {
+          "name": "Export Report",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/reports/{{report_id}}/export?format=markdown", "host": ["{{base_url}}"], "path": ["reports", "{{report_id}}", "export"], "query": [{"key": "format", "value": "markdown"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feishu",
+      "item": [
+        {
+          "name": "Get OAuth Config",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/feishu/oauth/config", "host": ["{{base_url}}"], "path": ["feishu", "oauth", "config"]}
+          }
+        },
+        {
+          "name": "Get Credential Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {"raw": "{{base_url}}/feishu/credential", "host": ["{{base_url}}"], "path": ["feishu", "credential"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Generate Test Cases",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/projects/{{project_id}}/ai/generate", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "ai", "generate"]},
+            "body": {"mode": "raw", "raw": "{\"source_type\":\"manual\",\"source_content\":\"用户登录功能：支持账号密码登录、手机验证码登录\",\"max_cases\":10,\"language\":\"zh-CN\"}"}
+          }
+        },
+        {
+          "name": "Optimize Test Case",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/cases/{{case_id}}/optimize", "host": ["{{base_url}}"], "path": ["cases", "{{case_id}}", "optimize"]},
+            "body": {"mode": "raw", "raw": "{\"optimize_type\":\"enhance\"}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/../health", "host": ["{{base_url}}", ".."], "path": ["health"]}
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8080/api/v1"},
+    {"key": "access_token", "value": ""},
+    {"key": "refresh_token", "value": ""},
+    {"key": "project_id", "value": ""},
+    {"key": "plan_id", "value": ""},
+    {"key": "case_id", "value": ""},
+    {"key": "execution_id", "value": ""},
+    {"key": "defect_id", "value": ""},
+    {"key": "report_id", "value": ""},
+    {"key": "user_id", "value": ""}
+  ]
+}
