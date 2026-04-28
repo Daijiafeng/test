@@ -44,6 +44,8 @@ func main() {
 	caseHandler := handler.NewTestCaseHandler(db)
 	moduleHandler := handler.NewModuleHandler(db)
 	customFieldHandler := handler.NewCustomFieldHandler(db)
+	executionHandler := handler.NewExecutionHandler(db)
+	defectHandler := handler.NewDefectHandler(db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -118,10 +120,38 @@ func main() {
 			authorized.PUT("/custom-fields/:field_id", customFieldHandler.Update)
 			authorized.DELETE("/custom-fields/:field_id", customFieldHandler.Delete)
 
-			// TODO: 测试执行
-			// TODO: 缺陷管理
+			// 测试执行
+			authorized.POST("/plans/:plan_id/executions", executionHandler.Create)
+			authorized.GET("/plans/:plan_id/executions", executionHandler.List)
+			authorized.GET("/executions/:execution_id", executionHandler.Get)
+			authorized.PUT("/executions/:execution_id", executionHandler.Update)
+			authorized.POST("/plans/:plan_id/executions/batch", executionHandler.BatchCreate)
+			authorized.POST("/executions/:execution_id/defect", executionHandler.CreateDefect)
+			authorized.GET("/plans/:plan_id/statistics", executionHandler.GetStatistics)
+			authorized.GET("/cases/:case_id/executions", executionHandler.ListByCase)
+			// 自动化执行
+			authorized.POST("/plans/:plan_id/auto-run", executionHandler.AutoRun)
+			authorized.GET("/auto-tasks/:task_id/status", executionHandler.AutoStatus)
+			authorized.POST("/executions/:execution_id/external-result", executionHandler.ExternalResult)
+
+			// 缺陷管理
+			authorized.POST("/projects/:project_id/defects", defectHandler.Create)
+			authorized.GET("/projects/:project_id/defects", defectHandler.List)
+			authorized.GET("/projects/:project_id/defects/search", defectHandler.Search)
+			authorized.GET("/projects/:project_id/defects/statistics", defectHandler.Statistics)
+			authorized.GET("/projects/:project_id/defects/export", defectHandler.Export)
+			authorized.PUT("/projects/:project_id/defects/batch", defectHandler.BatchUpdate)
+			authorized.GET("/defects/:defect_id", defectHandler.Get)
+			authorized.PUT("/defects/:defect_id", defectHandler.Update)
+			authorized.POST("/defects/:defect_id/transition", defectHandler.TransitionStatus)
+			authorized.POST("/defects/:defect_id/assign", defectHandler.Assign)
+			authorized.POST("/defects/:defect_id/comments", defectHandler.AddComment)
+			authorized.GET("/defects/:defect_id/comments", defectHandler.ListComments)
+			authorized.GET("/defects/:defect_id/history", defectHandler.GetHistory)
+
 			// TODO: 测试报告
 			// TODO: AI生成
+			// TODO: 飞书集成
 		}
 	}
 
