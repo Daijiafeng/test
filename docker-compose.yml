@@ -4,7 +4,7 @@ services:
   # PostgreSQL 数据库
   postgres:
     image: postgres:15-alpine
-    container_name: testmind-db
+    container_name: testmind-postgres
     environment:
       POSTGRES_USER: testmind
       POSTGRES_PASSWORD: testmind123
@@ -13,14 +13,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./migrations/001_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U testmind"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
-  # Redis 缓存（可选，用于Token黑名单）
+  # Redis 缓存（可选）
   redis:
     image: redis:7-alpine
     container_name: testmind-redis
@@ -28,29 +29,64 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  # Go 后端服务（需要先构建）
-  # user-svc:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: testmind-api
-  #   environment:
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_USER: testmind
-  #     DB_PASSWORD: testmind123
-  #     DB_NAME: testmind
-  #     JWT_SECRET: your-secret-key-min-32-characters
-  #     SERVER_PORT: 8080
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_started
+  # TestMind API 服务
+  testmind-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testmind-api
+    environment:
+      SERVER_PORT: 8080
+      SERVER_HOST: 0.0.0.0
+      ENVIRONMENT: production
+      
+      # 数据库配置
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: testmind
+      DB_PASSWORD: testmind123
+      DB_NAME: testmind
+      
+      # JWT配置
+      JWT_SECRET: ${JWT_SECRET:-testmind-secret-key-min-32-characters-required-for-production}
+      JWT_ACCESS_TOKEN_EXP: 2
+      JWT_REFRESH_TOKEN_EXP: 7
+      
+      # 飞书配置
+      FEISHU_APP_ID: ${FEISHU_APP_ID}
+      FEISHU_APP_SECRET: ${FEISHU_APP_SECRET}
+      FEISHU_REDIRECT_URI: ${FEISHU_REDIRECT_URI}
+      
+      # AI配置
+      AI_MODE: ${AI_MODE:-cloud}
+      AI_CLOUD_API_KEY: ${AI_CLOUD_API_KEY}
+      AI_CLOUD_MODEL: ${AI_CLOUD_MODEL:-gpt-4}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  default:
+    name: testmind-network
