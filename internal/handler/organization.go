@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"testmind/internal/config"
 	"testmind/internal/model"
 	"testmind/internal/repository"
 	"testmind/pkg/response"
@@ -14,14 +13,16 @@ import (
 )
 
 type OrganizationHandler struct {
-	orgRepo *repository.OrganizationRepository
-	userRepo *repository.UserRepository
+	orgRepo    *repository.OrganizationRepository
+	userRepo    *repository.UserRepository
+	projectRepo *repository.ProjectRepository
 }
 
 func NewOrganizationHandler(db *repository.DB) *OrganizationHandler {
 	return &OrganizationHandler{
-		orgRepo: repository.NewOrganizationRepository(db),
-		userRepo: repository.NewUserRepository(db),
+		orgRepo:    repository.NewOrganizationRepository(db),
+		userRepo:    repository.NewUserRepository(db),
+		projectRepo: repository.NewProjectRepository(db),
 	}
 }
 
@@ -148,14 +149,13 @@ func (h *OrganizationHandler) ListProjects(c *gin.Context) {
 
 	offset := (pageInt - 1) * pageSizeInt
 
-	projectRepo := repository.NewProjectRepository(h.orgRepo.db)
-	projects, err := projectRepo.ListByOrg(c.Request.Context(), orgID, pageSizeInt, offset)
+	projects, err := h.projectRepo.ListByOrg(c.Request.Context(), orgID, pageSizeInt, offset)
 	if err != nil {
 		response.InternalError(c, "查询项目列表失败", "Failed to list projects")
 		return
 	}
 
-	total, err := projectRepo.CountByOrg(c.Request.Context(), orgID)
+	total, err := h.projectRepo.CountByOrg(c.Request.Context(), orgID)
 	if err != nil {
 		response.InternalError(c, "统计项目数量失败", "Failed to count projects")
 		return

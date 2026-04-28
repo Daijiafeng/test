@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 
 	"testmind/internal/config"
-	"testmind/internal/model"
 	"testmind/internal/repository"
 	"testmind/pkg/response"
 )

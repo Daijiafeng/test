@@ -62,11 +62,9 @@ func (h *ReportHandler) Generate(c *gin.Context) {
 	}
 
 	// 收集统计数据
-	stats := h.collectStatistics(c.Request.Context(), req.PlanID, startDate, endDate)
+	stats := h.collectStatistics(c, req.PlanID, startDate, endDate)
 
-	// 构建报告内容
-	content := h.buildReportContent(stats, req.ReportType, req.IncludeCases, req.IncludeDefects)
-
+	// 构建 report
 	report := &model.TestReport{
 		ReportID:     reportID,
 		ProjectID:    projectID,
@@ -78,7 +76,7 @@ func (h *ReportHandler) Generate(c *gin.Context) {
 		GeneratedAt:  time.Now(),
 		StartDate:    startDate,
 		EndDate:      endDate,
-		Summary:      stats["summary"],
+		Summary:      fmt.Sprintf("%v", stats["summary"]),
 		Details:      model.JSONB(stats),
 		Language:     "zh-CN",
 		CreatedAt:    time.Now(),
@@ -321,8 +319,9 @@ func (h *ReportHandler) Share(c *gin.Context) {
 }
 
 // collectStatistics 收集统计数据
-func (h *ReportHandler) collectStatistics(ctx interface{}, planID string, startDate, endDate time.Time) map[string]interface{} {
+func (h *ReportHandler) collectStatistics(c *gin.Context, planID string, startDate, endDate time.Time) map[string]interface{} {
 	stats := make(map[string]interface{})
+	ctx := c.Request.Context()
 
 	// 用例统计
 	var caseStats struct {
