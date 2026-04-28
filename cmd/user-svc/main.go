@@ -49,6 +49,7 @@ func main() {
 	reportHandler := handler.NewReportHandler(db)
 	feishuHandler := handler.NewFeishuHandler(cfg, db)
 	aiHandler := handler.NewAIHandler(cfg, db)
+	knowledgeHandler := handler.NewKnowledgeHandler(db)
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// API路由
@@ -152,9 +153,12 @@ func main() {
 			authorized.GET("/defects/:defect_id/comments", defectHandler.ListComments)
 			authorized.GET("/defects/:defect_id/history", defectHandler.GetHistory)
 
-			// TODO: 测试报告
-			// TODO: AI生成
-			// TODO: 飞书集成
+			// AI生成
+			authorized.POST("/projects/:project_id/ai/generate", aiHandler.GenerateCase)
+			authorized.GET("/ai/tasks/:task_id", aiHandler.GetTaskStatus)
+			authorized.GET("/projects/:project_id/ai/tasks", aiHandler.ListTasks)
+			authorized.POST("/ai/tasks/:task_id/apply", aiHandler.ApplyCases)
+			authorized.POST("/cases/:case_id/optimize", aiHandler.OptimizeCase)
 
 			// 测试报告
 			authorized.POST("/projects/:project_id/reports", reportHandler.Generate)
@@ -174,12 +178,13 @@ func main() {
 			authorized.DELETE("/feishu/credential", feishuHandler.RevokeAuth)
 			authorized.GET("/feishu/documents/:doc_id", feishuHandler.FetchDocument)
 
-			// AI生成
-			authorized.POST("/projects/:project_id/ai/generate", aiHandler.GenerateCase)
-			authorized.GET("/ai/tasks/:task_id", aiHandler.GetTaskStatus)
-			authorized.GET("/projects/:project_id/ai/tasks", aiHandler.ListTasks)
-			authorized.POST("/ai/tasks/:task_id/apply", aiHandler.ApplyCases)
-			authorized.POST("/cases/:case_id/optimize", aiHandler.OptimizeCase)
+			// 知识库
+			authorized.POST("/projects/:project_id/knowledge", knowledgeHandler.Create)
+			authorized.GET("/projects/:project_id/knowledge", knowledgeHandler.List)
+			authorized.GET("/knowledge/:doc_id", knowledgeHandler.Get)
+			authorized.PUT("/knowledge/:doc_id", knowledgeHandler.Update)
+			authorized.DELETE("/knowledge/:doc_id", knowledgeHandler.Delete)
+			authorized.POST("/knowledge/:doc_id/sync", knowledgeHandler.SyncFeishu)
 		}
 	}
 

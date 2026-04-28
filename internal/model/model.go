@@ -170,19 +170,26 @@ type Defect struct {
 
 // TestReport 测试报告
 type TestReport struct {
-	ReportID     string    `json:"report_id" db:"report_id"`
-	ProjectID    string    `json:"project_id" db:"project_id"`
-	PlanID       string    `json:"plan_id" db:"plan_id"`
-	Title        string    `json:"title" db:"title"`
-	TitleEn      string    `json:"title_en" db:"title_en"`
-	ReportType   string    `json:"report_type" db:"report_type"`
-	Language     string    `json:"language" db:"language"`
-	Summary      JSONB     `json:"summary" db:"summary"`
-	AIEvaluation JSONB     `json:"ai_evaluation" db:"ai_evaluation"`
-	Content      string    `json:"content" db:"content"`
-	FeishuDocID  string    `json:"feishu_doc_id" db:"feishu_doc_id"`
-	CreatedBy    string    `json:"created_by" db:"created_by"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	ReportID     string     `json:"report_id" db:"report_id"`
+	ProjectID    string     `json:"project_id" db:"project_id"`
+	PlanID       string     `json:"plan_id" db:"plan_id"`
+	Title        string     `json:"title" db:"title"`
+	TitleEn      string     `json:"title_en" db:"title_en"`
+	ReportType   string     `json:"report_type" db:"report_type"`
+	Status       string     `json:"status" db:"status"` // draft, generated, published, archived
+	Language     string     `json:"language" db:"language"`
+	Summary      string     `json:"summary" db:"summary"` // 文字总结
+	Details      JSONB      `json:"details" db:"details"` // 详细数据
+	AIEvaluation JSONB      `json:"ai_evaluation" db:"ai_evaluation"`
+	Content      string     `json:"content" db:"content"`
+	FeishuDocID  string     `json:"feishu_doc_id" db:"feishu_doc_id"`
+	ShareURL     string     `json:"share_url" db:"share_url"`
+	GeneratedBy  string     `json:"generated_by" db:"generated_by"`
+	GeneratedAt  time.Time  `json:"generated_at" db:"generated_at"`
+	StartDate    time.Time  `json:"start_date" db:"start_date"`
+	EndDate      time.Time  `json:"end_date" db:"end_date"`
+	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // JSONB 用于 PostgreSQL JSONB 类型
@@ -206,11 +213,146 @@ type CustomFieldDefinition struct {
 	EntityType    string    `json:"entity_type" db:"entity_type"`
 	FieldName     string    `json:"field_name" db:"field_name"`
 	FieldNameEn   string    `json:"field_name_en" db:"field_name_en"`
- FieldType     string    `json:"field_type" db:"field_type"`
+	FieldType     string    `json:"field_type" db:"field_type"`
 	Options       JSONB     `json:"options" db:"options"`
 	Required      bool      `json:"required" db:"required"`
 	DefaultValue  string    `json:"default_value" db:"default_value"`
 	SortOrder     int       `json:"sort_order" db:"sort_order"`
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// OAuthState OAuth状态
+type OAuthState struct {
+	StateID   string    `json:"state_id" db:"state_id"`
+	UserID    string    `json:"user_id" db:"user_id"`
+	StateCode string    `json:"state_code" db:"state_code"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
+}
+
+// FeishuCredential 飞书凭证
+type FeishuCredential struct {
+	CredentialID  string    `json:"credential_id" db:"credential_id"`
+	UserID        string    `json:"user_id" db:"user_id"`
+	AccessToken   string    `json:"access_token" db:"access_token"`
+	RefreshToken  string    `json:"refresh_token" db:"refresh_token"`
+	ExpiresAt    time.Time `json:"expires_at" db:"expires_at"`
+	FeishuUserID  string    `json:"feishu_user_id" db:"feishu_user_id"`
+	FeishuName    string    `json:"feishu_name" db:"feishu_name"`
+	FeishuAvatar  string    `json:"feishu_avatar" db:"feishu_avatar"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// PlanRequirement 计划需求关联
+type PlanRequirement struct {
+	ID                int       `json:"id" db:"id"`
+	PlanID            string    `json:"plan_id" db:"plan_id"`
+	RequirementType   string    `json:"requirement_type" db:"requirement_type"`
+	RequirementURL    string    `json:"requirement_url" db:"requirement_url"`
+	RequirementTitle  string    `json:"requirement_title" db:"requirement_title"`
+	RequirementContent string   `json:"requirement_content" db:"requirement_content"`
+	FeishuDocID       string    `json:"feishu_doc_id" db:"feishu_doc_id"`
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+}
+
+// PlanCase 计划用例关联
+type PlanCase struct {
+	ID         int       `json:"id" db:"id"`
+	PlanID     string    `json:"plan_id" db:"plan_id"`
+	CaseID     string    `json:"case_id" db:"case_id"`
+	AssigneeID string    `json:"assignee_id" db:"assignee_id"`
+	SortOrder  int       `json:"sort_order" db:"sort_order"`
+	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+}
+
+// CaseVersion 用例版本历史
+type CaseVersion struct {
+	VersionID    int       `json:"version_id" db:"version_id"`
+	CaseID       string    `json:"case_id" db:"case_id"`
+	VersionNum   int       `json:"version_num" db:"version_num"`
+	Title        string    `json:"title" db:"title"`
+	Steps        JSONB     `json:"steps" db:"steps"`
+	ChangedBy    string    `json:"changed_by" db:"changed_by"`
+	ChangeSummary string   `json:"change_summary" db:"change_summary"`
+	Snapshot     JSONB     `json:"snapshot" db:"snapshot"`
+	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+}
+
+// CaseReview 用例评审
+type CaseReview struct {
+	ReviewID  string    `json:"review_id" db:"review_id"`
+	CaseID    string    `json:"case_id" db:"case_id"`
+	ReviewerID string   `json:"reviewer_id" db:"reviewer_id"`
+	Result    string    `json:"result" db:"result"`
+	Comment   string    `json:"comment" db:"comment"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// DefectComment 缺陷评论
+type DefectComment struct {
+	CommentID  string    `json:"comment_id" db:"comment_id"`
+	DefectID   string    `json:"defect_id" db:"defect_id"`
+	AuthorID   string    `json:"author_id" db:"author_id"`
+	Content    string    `json:"content" db:"content"`
+	Visibility string    `json:"visibility" db:"visibility"`
+	CreatedAt  time.Time `json:"created_at" db:"created_at"`
+}
+
+// AICaseGeneration AI用例生成任务
+type AICaseGeneration struct {
+	TaskID            string     `json:"task_id" db:"task_id"`
+	ProjectID         string     `json:"project_id" db:"project_id"`
+	SourceType        string     `json:"source_type" db:"source_type"`
+	SourceContent     string     `json:"source_content" db:"source_content"`
+	FeishuDocID       string     `json:"feishu_doc_id" db:"feishu_doc_id"`
+	RequestedBy       string     `json:"requested_by" db:"requested_by"`
+	Status            string     `json:"status" db:"status"`
+	GeneratedCount    int        `json:"generated_count" db:"generated_count"`
+	AppliedCount      int        `json:"applied_count" db:"applied_count"`
+	AppliedAt         *time.Time `json:"applied_at" db:"applied_at"`
+	ErrorMessage      string     `json:"error_message" db:"error_message"`
+	PriorityStrategy  string     `json:"priority_strategy" db:"priority_strategy"`
+	CaseStyle         string     `json:"case_style" db:"case_style"`
+	Language          string     `json:"language" db:"language"`
+	CustomPrompt      string     `json:"custom_prompt" db:"custom_prompt"`
+	MaxCases          int        `json:"max_cases" db:"max_cases"`
+	ModuleID          string     `json:"module_id" db:"module_id"`
+	CreatedAt         time.Time  `json:"created_at" db:"created_at"`
+	CompletedAt       *time.Time `json:"completed_at" db:"completed_at"`
+}
+
+// KnowledgeDoc 知识库文档
+type KnowledgeDoc struct {
+	DocID        string    `json:"doc_id" db:"doc_id"`
+	ProjectID    string    `json:"project_id" db:"project_id"`
+	Title        string    `json:"title" db:"title"`
+	DocType      string    `json:"doc_type" db:"doc_type"`
+	SourceType   string    `json:"source_type" db:"source_type"`
+	FeishuDocID  string    `json:"feishu_doc_id" db:"feishu_doc_id"`
+	FeishuDocURL string    `json:"feishu_doc_url" db:"feishu_doc_url"`
+	Content      string    `json:"content" db:"content"`
+	Summary      string    `json:"summary" db:"summary"`
+	Tags         []string  `json:"tags" db:"tags"`
+	VectorID     string    `json:"vector_id" db:"vector_id"`
+	Language     string    `json:"language" db:"language"`
+	CreatedBy    string    `json:"created_by" db:"created_by"`
+	UpdatedBy    string    `json:"updated_by" db:"updated_by"`
+	Version      int       `json:"version" db:"version"`
+	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// AuditLog 操作日志
+type AuditLog struct {
+	LogID         int       `json:"log_id" db:"log_id"`
+	EntityType    string    `json:"entity_type" db:"entity_type"`
+	EntityID      string    `json:"entity_id" db:"entity_id"`
+	OperationType string    `json:"operation_type" db:"operation_type"`
+	OperatorID    string    `json:"operator_id" db:"operator_id"`
+	BeforeValue   string    `json:"before_value" db:"before_value"`
+	AfterValue    string    `json:"after_value" db:"after_value"`
+	Details       string    `json:"details" db:"details"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
 }
