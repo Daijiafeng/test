@@ -305,8 +305,6 @@ func (h *FeishuHandler) refreshFeishuToken(refreshToken string) (*TokenResponse,
 
 // fetchFeishuDocument 获取飞书文档内容
 func (h *FeishuHandler) fetchFeishuDocument(accessToken, docID string) (string, error) {
-	apiURL := fmt.Sprintf("https://open.feishu.cn/open-apis/docx/v1/documents/%s/content", docID)
-
 	// TODO: 实际调用飞书API
 	// 这里返回模拟内容
 	return "飞书文档内容（待实现）", nil

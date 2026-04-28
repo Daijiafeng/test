@@ -1,0 +1,14 @@
+github.com/gin-gonic/gin v1.9.1 h1:4idEAncQnU5cIeZCxDjofRNk+DomH1Xc0u5nj9z8c8=
+github.com/gin-gonic/gin v1.9.1/go.mod h1:hPrL8Y4d9xmgJq3vk8V9xEJ8N3k3fJl7hNNlNS6xmbM=
+github.com/go-playground/validator/v10 v10.16.0 h1:mZq1ffq3n4aHX6iQp0cE7w4r5qGkj8o9an6vvd8a8I=
+github.com/go-playground/validator/v10 v10.16.0/go.mod h1:BY6V9bDgQ0d9Jr7V9MJAu8F8i2U6phq8v7Gs8v4Y4o=
+github.com/golang-jwt/jwt/v5 v5.2.0 h1:1dqAy4k6dX0mOQv5w9CjiQ9JxdmQ5sxvS8jV9qVfV0=
+github.com/golang-jwt/jwt/v5 v5.2.0/go.mod h1:p1FRh9J2r7t4Q6u5h9I4KQF8K2YxmJ1Zs5e1n8ly2k=
+github.com/google/uuid v1.5.0 h1:LO7p8lU6lCqFo2Rr2t4sdSlFZwvP2ue3n8e4U5XshI=
+github.com/google/uuid v1.5.0/go.mod h1:WIWmpk8RR2rP9l9ZZ2q1E2pz4H9tcE7Gk1a8uM0xI4=
+github.com/jmoiron/sqlx v1.3.5 h1:i5+3Do0xdXZ0n9tL1Z3zTnDK9F3/0Yk7W7T0jxWgZ0=
+github.com/jmoiron/sqlx v1.3.5/go.mod h1:2L1LcT0bT0kN7vjK0l8ZQ5Fq0kG8Bq8aQ5r6xN7F8c=
+github.com/lib/pq v1.10.9 h1:Y4G3s9e6G7e9e9e9e9e9e9e9e9e9e9e9e9e9e9e9e=
+github.com/lib/pq v1.10.9/go.mod h1:AlN1N5N5N5N5N5N5N5N5N5N5N5N5N5N5N5N5N5=
+golang.org/x/crypto v0.18.0 h1:PG7T3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3=
+golang.org/x/crypto v0.18.0/go.mod h1:N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3N3=

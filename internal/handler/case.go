@@ -102,18 +102,7 @@ func (h *TestCaseHandler) Get(c *gin.Context) {
 		return
 	}
 
-	// 反序列化步骤
-	if stepsData, ok := tc.Steps.([]interface{}); ok {
-		var steps []model.Step
-		for _, s := range stepsData {
-			b, _ := json.Marshal(s)
-			var step model.Step
-			json.Unmarshal(b, &step)
-			steps = append(steps, step)
-		}
-		tc.Steps = steps
-	}
-
+	// Steps 字段已在数据库层面正确反序列化，无需额外处理
 	response.Success(c, tc)
 }
 

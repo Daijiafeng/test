@@ -139,10 +139,10 @@ func (h *OrganizationHandler) ListProjects(c *gin.Context) {
 
 	pageInt := 1
 	pageSizeInt := 50
-	if p, err := validator.ValidateVar(page, "min=1"); err == nil {
+	if err := validator.ValidateVar(page, "min=1"); err == nil {
 		pageInt = parseInt(page)
 	}
-	if ps, err := validator.ValidateVar(pageSize, "min=1,max=100"); err == nil {
+	if err := validator.ValidateVar(pageSize, "min=1,max=100"); err == nil {
 		pageSizeInt = parseInt(pageSize)
 	}
 

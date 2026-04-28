@@ -269,10 +269,3 @@ func (h *ProjectHandler) UpdateMemberRole(c *gin.Context) {
 		"updated":    true,
 	})
 }
-
-func stringOrDefault(s, def string) string {
-	if s == "" {
-		return def
-	}
-	return s
-}

@@ -58,7 +58,6 @@ func (h *DefectHandler) Create(c *gin.Context) {
 		ReporterID:         userID,
 		RelatedCaseID:      req.RelatedCaseID,
 		RelatedExecutionID: req.RelatedExecutionID,
-		Tags:               req.Tags,
 		Language:           "zh-CN",
 		CustomFields:       model.JSONB(req.CustomFields),
 		CreatedAt:          time.Now(),
@@ -67,14 +66,14 @@ func (h *DefectHandler) Create(c *gin.Context) {
 
 	query := `
 		INSERT INTO defects (defect_id, project_id, title, title_en, description, severity, priority,
-			module_id, status, reporter_id, related_case_id, related_execution_id, tags, language,
+			module_id, status, reporter_id, related_case_id, related_execution_id, language,
 			custom_fields, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 	`
 	_, err := h.db.ExecContext(c.Request.Context(), query,
 		defect.DefectID, defect.ProjectID, defect.Title, defect.TitleEn, defect.Description,
 		defect.Severity, defect.Priority, defect.ModuleID, defect.Status, defect.ReporterID,
-		defect.RelatedCaseID, defect.RelatedExecutionID, defect.Tags, defect.Language,
+		defect.RelatedCaseID, defect.RelatedExecutionID, defect.Language,
 		defect.CustomFields, defect.CreatedAt, defect.UpdatedAt)
 	if err != nil {
 		response.InternalError(c, "创建缺陷失败", "Failed to create defect")

@@ -222,7 +222,7 @@ func (h *AIHandler) ApplyCases(c *gin.Context) {
 	inserted := 0
 	var appliedCaseIDs []string
 
-	for i, tc := range generatedCases {
+	for _, tc := range generatedCases {
 		// 如果指定了特定用例，只应用那些
 		if len(req.CaseIDs) > 0 && !contains(req.CaseIDs, tc["case_id"].(string)) {
 			continue
@@ -350,22 +350,19 @@ func (h *AIHandler) mockGenerateCases(task *model.AICaseGeneration) []map[string
 			"precondition":  "系统正常运行，用户已登录",
 			"steps": []model.Step{
 				{
-					StepNum:   1,
-					Action:    "进入功能页面",
-					Expected:  "页面正常加载",
-					StepType:  "action",
+					StepNum:  1,
+					Action:   "进入功能页面",
+					Expected: "页面正常加载",
 				},
 				{
-					StepNum:   2,
-					Action:    "执行核心操作",
-					Expected:  "操作成功执行",
-					StepType:  "action",
+					StepNum:  2,
+					Action:   "执行核心操作",
+					Expected: "操作成功执行",
 				},
 				{
-					StepNum:   3,
-					Action:    "验证结果",
-					Expected:  "结果符合预期",
-					StepType:  "verify",
+					StepNum:  3,
+					Action:   "验证结果",
+					Expected: "结果符合预期",
 				},
 			},
 			"language": task.Language,
