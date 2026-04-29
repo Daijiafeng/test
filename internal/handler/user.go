@@ -138,8 +138,10 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	// 更新最后登录时间
 	now := time.Now()
-	user.LastLoginAt = now
-	h.userRepo.Update(c.Request.Context(), user)
+	user.LastLoginAt = &now
+	if err := h.userRepo.Update(c.Request.Context(), user); err != nil {
+		log.Printf("Failed to update last login time: %v", err)
+	}
 
 	// 生成Token
 	tokenPair, err := h.jwtManager.GenerateTokenPair(user.UserID, user.Username, "", "")

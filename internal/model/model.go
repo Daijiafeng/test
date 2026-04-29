@@ -48,7 +48,7 @@ type User struct {
 	DisplayNameEn  string    `json:"display_name_en" db:"display_name_en"`
 	Language       string    `json:"language" db:"language"`
 	Status         string    `json:"status" db:"status"`
-	LastLoginAt    time.Time `json:"last_login_at" db:"last_login_at"`
+	LastLoginAt    *time.Time `json:"last_login_at" db:"last_login_at"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
 }
