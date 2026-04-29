@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -118,16 +119,19 @@ func (h *UserHandler) Login(c *gin.Context) {
 	// 查询数据库验证用户名密码
 	user, err := h.userRepo.FindByUsername(c.Request.Context(), req.Username)
 	if err != nil {
-		response.InternalError(c, "登录失败", "Failed to login")
+		log.Printf("Failed to find user: %v", err)
+		response.InternalError(c, "登录失败: "+err.Error(), "Failed to login: "+err.Error())
 		return
 	}
 	if user == nil {
+		log.Printf("User not found: %s", req.Username)
 		response.Unauthorized(c)
 		return
 	}
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		log.Printf("Password mismatch for user %s", req.Username)
 		response.Unauthorized(c)
 		return
 	}
