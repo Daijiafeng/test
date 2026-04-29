@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -64,9 +65,15 @@ func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*
 	query := `SELECT * FROM users WHERE username = $1`
 	err := r.db.GetContext(ctx, &user, query, username)
 	if err == sql.ErrNoRows {
+		log.Printf("User not found: %s", username)
 		return nil, nil
 	}
-	return &user, err
+	if err != nil {
+		log.Printf("Database query error for user %s: %v", username, err)
+		return nil, err
+	}
+	log.Printf("User found: %+v", user)
+	return &user, nil
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, userID string) (*model.User, error) {
