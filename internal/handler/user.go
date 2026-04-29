@@ -79,9 +79,12 @@ func (h *UserHandler) Register(c *gin.Context) {
 		user.Language = "zh-CN"
 	}
 
+	log.Printf("Registering user: %+v", user)
+
 	// 保存到数据库
 	if err := h.userRepo.Create(c.Request.Context(), user); err != nil {
-		response.InternalError(c, "注册失败", "Failed to register user")
+		log.Printf("Failed to create user: %v", err)
+		response.InternalError(c, "注册失败: "+err.Error(), "Failed to register user: "+err.Error())
 		return
 	}
 
